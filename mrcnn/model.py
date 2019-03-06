@@ -703,12 +703,19 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     Returns detections shaped: [N, (y1, x1, y2, x2, class_id, score)] where
         coordinates are normalized.
     """
+
+    logging.info("running the refine_detections_graph step")
+
     if config.HACKY_NUC_PROB_ADJ:
-        #very hacky - adjust nucleus probability to be 0.5 higher, making more likely to get nucleus classification
+        logging.info("adjusting nucleus probabilities to be higher by " + str(config.HACKY_NUC_PROB_ADJ))
+        # very hacky - just makes more ROIs get nucleus classification
         adj_vals_arr = np.array(np.tile([0, 0.5], (probs.shape[0], 1)), dtype='float32')
         assert adj_vals_arr.shape == probs.shape
         adj_vals_tensor = tf.constant(adj_vals_arr)
         probs = tf.add(probs, adj_vals_tensor)
+    else:
+        logging.info("not adjusting nucleus probabilities. adjustment val was " + str(config.HACKY_NUC_PROB_ADJ))
+
 
     # Class IDs per ROI
     class_ids = tf.argmax(probs, axis=1, output_type=tf.int32)

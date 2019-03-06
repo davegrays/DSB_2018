@@ -175,8 +175,8 @@ class NucleusInferenceConfig(NucleusConfig):
     # You can increase this during training to generate more propsals.
     RPN_NMS_THRESHOLD = 0.95
 
-    # Set to if you want to leave default settings
-    HACKY_NUC_PROB_ADJ = 0.5
+    # Set to 0 if you want to leave default settings, otherwise between 0 and 1 (for more nuclei)
+    HACKY_NUC_PROB_ADJ = 0
 
 
 ############################################################
