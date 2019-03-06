@@ -24,8 +24,11 @@ import keras.layers as KL
 import keras.engine as KE
 import keras.models as KM
 
-# from mrcnn import utils
-import utils
+from mrcnn import utils
+#import utils
+
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 # Requires TensorFlow 1.3+ and Keras 2.0.8+.
 from distutils.version import LooseVersion
@@ -700,6 +703,13 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     Returns detections shaped: [N, (y1, x1, y2, x2, class_id, score)] where
         coordinates are normalized.
     """
+    if config.HACKY_NUC_PROB_ADJ:
+        #very hacky - adjust nucleus probability to be 0.5 higher, making more likely to get nucleus classification
+        adj_vals_arr = np.array(np.tile([0, 0.5], (probs.shape[0], 1)), dtype='float32')
+        assert adj_vals_arr.shape == probs.shape
+        adj_vals_tensor = tf.constant(adj_vals_arr)
+        probs = tf.add(probs, adj_vals_tensor)
+
     # Class IDs per ROI
     class_ids = tf.argmax(probs, axis=1, output_type=tf.int32)
     # Class probability of the top class of each ROI
@@ -2191,7 +2201,7 @@ class MaskRCNN():
         exlude: list of layer names to excluce
         """
         import h5py
-        from keras.engine import topology
+        from keras.engine import saving
 
         if exclude:
             by_name = True
@@ -2213,9 +2223,9 @@ class MaskRCNN():
             layers = filter(lambda l: l.name not in exclude, layers)
 
         if by_name:
-            topology.load_weights_from_hdf5_group_by_name(f, layers)
+            saving.load_weights_from_hdf5_group_by_name(f, layers)
         else:
-            topology.load_weights_from_hdf5_group(f, layers)
+            saving.load_weights_from_hdf5_group(f, layers)
         if hasattr(f, 'close'):
             f.close()
 

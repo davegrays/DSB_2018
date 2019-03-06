@@ -173,7 +173,10 @@ class NucleusInferenceConfig(NucleusConfig):
     IMAGE_RESIZE_MODE = "pad64"
     # Non-max suppression threshold to filter RPN proposals.
     # You can increase this during training to generate more propsals.
-    RPN_NMS_THRESHOLD = 0.7
+    RPN_NMS_THRESHOLD = 0.95
+
+    # Set to if you want to leave default settings
+    HACKY_NUC_PROB_ADJ = 0.5
 
 
 ############################################################
@@ -199,7 +202,7 @@ class NucleusDataset(utils.Dataset):
         # "val": use hard-coded list above
         # "train": use data from stage1_train minus the hard-coded list above
         # else: use the data from the specified sub-directory
-        assert subset in ["train", "val", "stage1_train", "stage1_test", "stage2_test"]
+        # assert subset in ["train", "val", "stage1_train", "stage1_test", "stage2_test"]
         subset_dir = "stage1_train" if subset in ["train", "val"] else subset
         dataset_dir = os.path.join(dataset_dir, subset_dir)
         if subset == "val":
